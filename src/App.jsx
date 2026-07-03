@@ -1,16 +1,21 @@
-import { Toaster } from "@/components/ui/toaster"
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import PageNotFound from './lib/PageNotFound';
-import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import ScrollToTop from './components/ScrollToTop';
-import Home from './pages/Home';
+import { Toaster } from "@/components/ui/toaster";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClientInstance } from "@/lib/query-client";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import PageNotFound from "./lib/PageNotFound";
+import { AuthProvider, useAuth } from "@/lib/AuthContext";
+import UserNotRegisteredError from "@/components/UserNotRegisteredError";
+import ScrollToTop from "./components/ScrollToTop";
+import Home from "./pages/Home";
 // Add page imports here
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const {
+    isLoadingAuth,
+    isLoadingPublicSettings,
+    authError,
+    navigateToLogin,
+  } = useAuth();
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -23,9 +28,45 @@ const AuthenticatedApp = () => {
 
   // Handle authentication errors
   if (authError) {
-    if (authError.type === 'user_not_registered') {
+    if (authError.type === "user_not_registered") {
       return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
+    } else if (authError.type === "auth_required") {
       // Redirect to login automatically
       navigateToLogin();
       return null;
+    }
+
+    return (
+      <div className="p-4 text-center">
+        Authentication Error
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<Home />} />
+
+        {/* Add routes here */}
+
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+
+      <Toaster />
+    </>
+  );
+};
+
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClientInstance}>
+      <AuthProvider>
+        <Router>
+          <AuthenticatedApp />
+        </Router>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
